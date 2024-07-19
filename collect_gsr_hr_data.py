@@ -1,32 +1,35 @@
-import sys
 import serial
-import psycopg2
 import time
+import csv
 
-def save_gsr_hr_data(participant_id, ir_value, bpm, avg_bpm, gsr_value, current_video):
-    conn = psycopg2.connect(dbname='neurodata', user='postgres', password='yourpassword', host='localhost')
-    cursor = conn.cursor()
-    
-    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
-    cursor.execute("INSERT INTO gsr_hr_data (participant_id, timestamp, ir_value, bpm, avg_bpm, gsr_value, current_video) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                   (participant_id, timestamp, ir_value, bpm, avg_bpm, gsr_value, current_video))
-    
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-if __name__ == '__main__':
-    port = sys.argv[1]
-    current_video = sys.argv[2]
-    ser = serial.Serial(port, 115200)  # Ajuste a porta conforme necessário
-    participant_id = 1  # ID do participante
-
-    while True:
-        if ser.in_waiting:
+def collect_data(port, duration=120):
+    try:
+        ser = serial.Serial(port, 115200)
+        ser.write(b'L')
+        start_time = time.time()
+        data = []
+        while time.time() - start_time < duration:
             line = ser.readline().decode('utf-8').strip()
-            values = line.split(',')
-            if len(values) == 4:
-                ir_value, bpm, avg_bpm, gsr_value = map(float, values)
-                save_gsr_hr_data(participant_id, ir_value, bpm, avg_bpm, gsr_value, current_video)
-            else:
-                print(f"Received an incomplete line: {line}")
+            data.append(line.split(','))
+            print(line)
+        ser.write(b'D')
+        ser.close()
+        return data
+    except Exception as e:
+        print(f"Erro durante a coleta de dados: {str(e)}")
+        return []
+
+def save_to_csv(data, filename='sensor_data.csv'):
+    try:
+        with open(filename, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['IR', 'BPM', 'Avg_BPM', 'GSR'])
+            writer.writerows(data)
+        print(f"Dados salvos em {filename}")
+    except Exception as e:
+        print(f"Erro ao salvar CSV: {str(e)}")
+
+if __name__ == "__main__":
+    port = input("Digite a porta serial: ")
+    data = collect_data(port)
+    save_to_csv(data)

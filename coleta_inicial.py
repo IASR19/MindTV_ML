@@ -1,9 +1,11 @@
 import sys
-import serial.tools.list_ports
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox, QTextEdit, QLineEdit
-from PyQt5.QtCore import QThread, pyqtSignal
 import time
-import csv
+import os
+import pandas as pd
+import serial
+import serial.tools.list_ports
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox, QTextEdit
+from PyQt5.QtCore import QThread, pyqtSignal
 
 class DataCollectionThread(QThread):
     log_signal = pyqtSignal(str)
@@ -13,19 +15,22 @@ class DataCollectionThread(QThread):
         super().__init__()
         self.port = port
         self.duration = duration
+        self.ser = None
 
     def run(self):
         try:
-            ser = serial.Serial(self.port, 115200)
-            ser.write(b'L')
+            self.ser = serial.Serial(self.port, 115200)
+            self.log_signal.emit("Iniciando coleta de dados...")
             start_time = time.time()
             data = []
             while time.time() - start_time < self.duration:
-                line = ser.readline().decode('utf-8').strip()
-                data.append(line.split(','))
-                self.log_signal.emit(line)
-            ser.write(b'D')
-            ser.close()
+                if self.ser.in_waiting > 0:
+                    line = self.ser.readline().decode('utf-8').strip()
+                    if ',' in line:
+                        irValue, beatsPerMinute, beatAvg, GSR = line.split(',')
+                        data.append([irValue, beatsPerMinute, beatAvg, GSR])
+                        self.log_signal.emit(f"IR: {irValue}, BPM: {beatsPerMinute}, Avg BPM: {beatAvg}, GSR: {GSR}")
+            self.ser.close()
             self.data_signal.emit(data)
             self.log_signal.emit("Coleta de dados concluída.")
         except Exception as e:
@@ -48,19 +53,19 @@ class MainWindow(QWidget):
             self.port_combo.addItem(port.device)
         layout.addWidget(self.port_combo)
 
-        self.content_label = QLabel("Selecione o Tipo de Conteúdo:")
+        self.duration_label = QLabel("Tempo de Coleta (minutos):")
+        layout.addWidget(self.duration_label)
+
+        self.duration_combo = QComboBox(self)
+        self.duration_combo.addItems(["1", "2", "3", "4", "5"])
+        layout.addWidget(self.duration_combo)
+
+        self.content_label = QLabel("Tipo de Conteúdo Assistido:")
         layout.addWidget(self.content_label)
 
         self.content_combo = QComboBox(self)
-        self.content_combo.addItems(["Reality Show", "Filme - Ação", "Filme - Drama", "Programa de Política", "Jornal"])
+        self.content_combo.addItems(["Reality Show", "Filme de Ação", "Filme de Comédia", "Programa de Política", "Jornal"])
         layout.addWidget(self.content_combo)
-
-        self.duration_label = QLabel("Duração da Coleta (segundos):")
-        layout.addWidget(self.duration_label)
-
-        self.duration_input = QLineEdit(self)
-        self.duration_input.setText("120")
-        layout.addWidget(self.duration_input)
 
         self.collect_button = QPushButton('Iniciar Coleta', self)
         self.collect_button.clicked.connect(self.collect_data)
@@ -68,10 +73,11 @@ class MainWindow(QWidget):
 
         self.export_button = QPushButton('Exportar CSV', self)
         self.export_button.clicked.connect(self.export_csv)
-        layout.addWidget(self.export_button)
         self.export_button.setEnabled(False)
+        layout.addWidget(self.export_button)
 
         self.output = QTextEdit(self)
+        self.output.setReadOnly(True)  # Torna o campo de log somente leitura
         layout.addWidget(self.output)
 
         self.setLayout(layout)
@@ -81,16 +87,14 @@ class MainWindow(QWidget):
     def get_selected_port(self):
         return self.port_combo.currentText()
 
-    def get_duration(self):
-        return int(self.duration_input.text())
-
-    def get_content_type(self):
-        return self.content_combo.currentText()
+    def get_selected_duration(self):
+        return int(self.duration_combo.currentText()) * 60
 
     def collect_data(self):
         port = self.get_selected_port()
-        duration = self.get_duration()
-        self.output.append(f"Iniciando coleta de dados na porta {port} por {duration} segundos...")
+        duration = self.get_selected_duration()
+        self.output.append(f"Iniciando coleta de dados na porta {port} por {duration // 60} minutos...")
+        self.collect_button.setEnabled(False)  # Desabilita o botão após ser clicado
 
         self.data_collection_thread = DataCollectionThread(port, duration)
         self.data_collection_thread.log_signal.connect(self.log_output)
@@ -103,18 +107,28 @@ class MainWindow(QWidget):
     def store_data(self, data):
         self.data = data
         self.export_button.setEnabled(True)
+        self.collect_button.setEnabled(True)  # Reabilita o botão após a coleta ser concluída
+        self.output.append("Coleta de dados armazenada.")
 
     def export_csv(self):
-        content_type = self.get_content_type()
-        filename = f'sensor_data_{content_type}.csv'
         try:
-            with open(filename, mode='w', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(['IR', 'BPM', 'Avg_BPM', 'GSR'])
-                writer.writerows(self.data)
-            self.output.append(f"Dados salvos em {filename}")
+            df = pd.DataFrame(self.data, columns=['irValue', 'beatsPerMinute', 'beatAvg', 'GSR'])
+            content_type = self.content_combo.currentText()
+            df['Content'] = content_type
+
+            # Verificar se já existe um arquivo com o mesmo nome e ajustar o nome do arquivo se necessário
+            base_filename = 'coleta_dados'
+            extension = '.csv'
+            filename = base_filename + extension
+            counter = 1
+            while os.path.exists(filename):
+                filename = f"{base_filename}({counter}){extension}"
+                counter += 1
+
+            df.to_csv(filename, index=False)
+            self.output.append(f"Dados exportados para {filename}")
         except Exception as e:
-            self.output.append(f"Erro ao salvar CSV: {str(e)}")
+            self.output.append(f"Erro ao exportar dados: {str(e)}")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -1,3 +1,4 @@
+from builtins import Exception, range, str, super
 import sys
 import pandas as pd
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QFileDialog, QTextEdit

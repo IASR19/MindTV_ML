@@ -36,6 +36,9 @@ MANIFEST
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+coleta_dados.csv
+collected_data.csv
+trained_model.joblib
 
 # Unit test / coverage reports
 htmlcov/

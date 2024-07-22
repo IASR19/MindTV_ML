@@ -1,3 +1,4 @@
+from builtins import Exception, float, print, str
 import pandas as pd
 
 def preprocess_data(input_csv='sensor_data.csv', output_csv='preprocessed_data.csv'):

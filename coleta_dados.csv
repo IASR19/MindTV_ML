@@ -1,31 +1,173 @@
 irValue,beatsPerMinute,beatAvg,GSR,Content
-680,75,76,314,Reality Show
-700,80,79,320,Reality Show
-690,77,76,310,Reality Show
-720,85,84,330,Reality Show
-680,78,77,315,Reality Show
-750,60,62,300,Filme - Ação
-740,62,63,310,Filme - Ação
-760,58,59,305,Filme - Ação
-770,64,65,320,Filme - Ação
-780,61,62,315,Filme - Ação
-620,70,71,295,Filme - Comédia
-630,72,73,300,Filme - Comédia
-610,68,69,290,Filme - Comédia
-640,74,75,305,Filme - Comédia
-600,66,67,285,Filme - Comédia
-800,85,86,340,Filme - Terror
-810,87,88,345,Filme - Terror
-790,83,84,335,Filme - Terror
-820,89,90,350,Filme - Terror
-780,81,82,330,Filme - Terror
-650,55,56,280,Programa de Política
-660,57,58,285,Programa de Política
-640,53,54,275,Programa de Política
-670,59,60,290,Programa de Política
-630,51,52,270,Programa de Política
-710,65,66,320,Jornal
-720,67,68,325,Jornal
-700,63,64,315,Jornal
-730,69,70,330,Jornal
-690,61,62,310,Jornal
+520,65,64,300,Programa esportivo
+615,70,68,320,Programa esportivo
+750,85,80,450,Programa jornalistico
+680,75,72,380,Programa jornalistico
+540,60,62,250,Programa politico
+700,78,75,410,Programa politico
+650,80,78,390,Filme de acao
+780,88,84,500,Filme de acao
+610,72,70,310,Filme de comedia
+700,75,74,350,Filme de comedia
+650,70,69,320,Filme de terror
+800,90,88,520,Filme de terror
+660,75,73,330,Serie de drama
+710,78,76,360,Serie de drama
+540,60,58,220,Programa de musica
+680,70,68,300,Programa de musica
+620,68,67,290,Serie de comedia
+690,75,74,350,Serie de comedia
+630,70,68,320,Serie de acao
+750,85,82,450,Serie de acao
+540,65,63,250,Reality show
+700,78,76,400,Reality show
+560,65,63,270,Documentario
+690,75,74,350,Documentario
+520,60,58,240,Desenho animado
+630,70,68,320,Desenho animado
+600,68,67,290,Programa de culinaria
+690,75,73,360,Programa de culinaria
+610,68,66,310,Programa de viagem
+680,72,70,330,Programa de viagem
+640,70,69,320,Programa de entrevistas
+710,78,76,380,Programa de entrevistas
+570,65,63,280,Serie de ficcao cientifica
+720,80,78,420,Serie de ficcao cientifica
+580,65,64,290,Programa de variedade
+690,75,74,350,Programa de variedade
+540,60,58,260,Programa infantil
+630,70,69,320,Programa infantil
+620,68,67,300,Minisserie
+700,78,76,380,Minisserie
+650,70,68,310,Filme de romance
+700,78,76,380,Filme de romance
+670,75,74,330,Serie de suspense
+750,85,82,420,Serie de suspense
+640,70,69,320,Programa de auditorio
+700,78,76,380,Programa de auditorio
+590,65,63,280,Programa de reformas
+680,72,70,330,Programa de reformas
+610,68,67,310,Programa de talentos
+710,78,76,380,Programa de talentos
+660,70,69,330,Filme de aventura
+720,80,78,400,Filme de aventura
+640,70,69,320,Filme de fantasia
+710,78,76,380,Filme de fantasia
+650,72,70,330,Serie de misterio
+740,85,82,410,Serie de misterio
+600,68,66,310,Programa de saude e bem estar
+680,72,70,350,Programa de saude e bem estar
+540,60,58,260,Telejornal
+690,75,73,360,Telejornal
+620,68,67,290,Novela
+700,78,76,380,Novela
+620,68,67,290,Programa de tecnologia
+680,72,70,340,Programa de tecnologia
+590,65,63,280,Programa de natureza e vida selvagem
+680,72,70,350,Programa de natureza e vida selvagem
+640,70,69,320,Talk show
+700,78,76,380,Talk show
+600,68,66,310,Programa de moda e estilo
+690,75,73,350,Programa de moda e estilo
+650,72,70,330,Filme historico
+720,80,78,400,Filme historico
+630,70,68,320,Serie policial
+700,78,76,380,Serie policial
+600,68,66,310,Programa de quiz e jogos
+680,72,70,340,Programa de quiz e jogos
+620,68,67,290,Serie documental
+690,75,73,360,Serie documental
+600,68,66,310,Programa de debates
+690,75,73,350,Programa de debates
+590,65,63,280,Programa de espiritualidade/religiao
+680,72,70,350,Programa de espiritualidade/religiao
+620,68,67,290,Filme de animacao
+700,78,76,380,Filme de animacao
+640,70,69,320,Serie antologica
+720,80,78,400,Serie antologica
+520,65,64,300,Programa esportivo
+615,70,68,320,Programa esportivo
+750,85,80,450,Programa jornalistico
+680,75,72,380,Programa jornalistico
+540,60,62,250,Programa politico
+700,78,75,410,Programa politico
+650,80,78,390,Filme de acao
+780,88,84,500,Filme de acao
+610,72,70,310,Filme de comedia
+700,75,74,350,Filme de comedia
+650,70,69,320,Filme de terror
+800,90,88,520,Filme de terror
+660,75,73,330,Serie de drama
+710,78,76,360,Serie de drama
+540,60,58,220,Programa de musica
+680,70,68,300,Programa de musica
+620,68,67,290,Serie de comedia
+690,75,74,350,Serie de comedia
+630,70,68,320,Serie de acao
+750,85,82,450,Serie de acao
+540,65,63,250,Reality show
+700,78,76,400,Reality show
+560,65,63,270,Documentario
+690,75,74,350,Documentario
+520,60,58,240,Desenho animado
+630,70,68,320,Desenho animado
+600,68,67,290,Programa de culinaria
+690,75,73,360,Programa de culinaria
+610,68,66,310,Programa de viagem
+680,72,70,330,Programa de viagem
+640,70,69,320,Programa de entrevistas
+710,78,76,380,Programa de entrevistas
+570,65,63,280,Serie de ficcao cientifica
+720,80,78,420,Serie de ficcao cientifica
+580,65,64,290,Programa de variedade
+690,75,74,350,Programa de variedade
+540,60,58,260,Programa infantil
+630,70,69,320,Programa infantil
+620,68,67,300,Minisserie
+700,78,76,380,Minisserie
+650,70,68,310,Filme de romance
+700,78,76,380,Filme de romance
+670,75,74,330,Serie de suspense
+750,85,82,420,Serie de suspense
+640,70,69,320,Programa de auditorio
+700,78,76,380,Programa de auditorio
+590,65,63,280,Programa de reformas
+680,72,70,330,Programa de reformas
+610,68,67,310,Programa de talentos
+710,78,76,380,Programa de talentos
+660,70,69,330,Filme de aventura
+720,80,78,400,Filme de aventura
+640,70,69,320,Filme de fantasia
+710,78,76,380,Filme de fantasia
+650,72,70,330,Serie de misterio
+740,85,82,410,Serie de misterio
+600,68,66,310,Programa de saude e bem estar
+680,72,70,350,Programa de saude e bem estar
+540,60,58,260,Telejornal
+690,75,73,360,Telejornal
+620,68,67,290,Novela
+700,78,76,380,Novela
+620,68,67,290,Programa de tecnologia
+680,72,70,340,Programa de tecnologia
+590,65,63,280,Programa de natureza e vida selvagem
+680,72,70,350,Programa de natureza e vida selvagem
+640,70,69,320,Talk show
+700,78,76,380,Talk show
+600,68,66,310,Programa de moda e estilo
+690,75,73,350,Programa de moda e estilo
+650,72,70,330,Filme historico
+720,80,78,400,Filme historico
+630,70,68,320,Serie policial
+700,78,76,380,Serie policial
+600,68,66,310,Programa de quiz e jogos
+680,72,70,340,Programa de quiz e jogos
+620,68,67,290,Serie documental
+690,75,73,360,Serie documental
+600,68,66,310,Programa de debates
+690,75,73,350,Programa de debates
+590,65,63,280,Programa de espiritualidade/religiao
+680,72,70,350,Programa de espiritualidade/religiao
+620,68,67,290,Filme de animacao
+700,78,76,380,Filme de animacao
+640,70,69,320,Serie antologica
+720,80,78,400,Serie antologica

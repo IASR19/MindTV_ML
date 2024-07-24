@@ -1,13 +1,17 @@
-import sys
+from builtins import Exception, float, int, len, list, range, str, super
 import os
+import sys
 import pandas as pd
 import serial
 import serial.tools.list_ports
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox, QTextEdit, QSpinBox, QProgressBar, QDialog, QHBoxLayout, QTabWidget, QFileDialog
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QComboBox,
+    QTextEdit, QSpinBox, QProgressBar, QDialog, QHBoxLayout, QTabWidget, QFileDialog
+)
 from PyQt5.QtCore import QThread, pyqtSignal
 from joblib import load, dump
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
 
 class DataCollectionThread(QThread):
     log_signal = pyqtSignal(str)
@@ -30,7 +34,7 @@ class DataCollectionThread(QThread):
                 self.log_signal.emit(data)
                 data_split = data.split(',')
                 if len(data_split) == 4:
-                    collected_data.append([float(data_split[0]), float(data_split[1]), float(data_split[2]), float(data_split[3])])
+                    collected_data.append([float(data_split[1]), float(data_split[2]), float(data_split[3])])  # Ignoring irValue
                 elapsed_time = (pd.Timestamp.now() - start_time).seconds
                 progress = int((elapsed_time / self.duration) * 100)
                 self.progress_signal.emit(progress)
@@ -50,7 +54,7 @@ class PredictionThread(QThread):
 
     def run(self):
         try:
-            df = pd.DataFrame(self.data, columns=['irValue', 'beatsPerMinute', 'beatAvg', 'GSR'])
+            df = pd.DataFrame(self.data, columns=['beatsPerMinute', 'beatAvg', 'GSR'])
             predictions = self.model.predict(df)
             prediction_counts = pd.Series(predictions).value_counts()
             most_common = prediction_counts.idxmax()
@@ -78,7 +82,7 @@ class TrainingThread(QThread):
                         return
                     dfs.append(df)
             data = pd.concat(dfs, ignore_index=True)
-            X = data[['irValue', 'beatsPerMinute', 'beatAvg', 'GSR']]
+            X = data[['beatsPerMinute', 'beatAvg', 'GSR']]
             y = data['Content']
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
             model = RandomForestClassifier(n_estimators=100, random_state=42)
@@ -116,16 +120,18 @@ class ColetaInicialWidget(QWidget):
         layout.addWidget(self.content_label)
 
         self.content_combo = QComboBox(self)
-        self.content_combo.addItems(["Programa esportivo", "Programa jornalistico", "Programa politico", "Filme de acao", "Filme de comedia",
-                                     "Filme de terror", "Serie de drama", "Programa de musica", "Serie de comedia", "Serie de acao",
-                                     "Reality show", "Documentario", "Desenho animado", "Programa de culinaria", "Programa de viagem",
-                                     "Programa de entrevistas", "Serie de ficcao cientifica", "Programa de variedade", "Programa infantil",
-                                     "Minisserie", "Filme de romance", "Serie de suspense", "Programa de auditorio", "Programa de reformas",
-                                     "Programa de talentos", "Filme de aventura", "Filme de fantasia", "Serie de misterio",
-                                     "Programa de saude e bem-estar", "Telejornal", "Novela", "Programa de tecnologia",
-                                     "Programa de natureza e vida selvagem", "Talk show", "Programa de moda e estilo", "Filme historico",
-                                     "Serie policial", "Programa de quiz e jogos", "Serie documental", "Programa de debates",
-                                     "Programa de espiritualidade religiao", "Filme de animacao", "Serie antologica"])
+        self.content_combo.addItems([
+            "Programa esportivo", "Programa jornalistico", "Programa politico", "Filme de acao", "Filme de comedia", 
+            "Filme de terror", "Serie de drama", "Programa de musica", "Serie de comedia", "Serie de acao", 
+            "Reality show", "Documentario", "Desenho animado", "Programa de culinaria", "Programa de viagem", 
+            "Programa de entrevistas", "Serie de ficcao cientifica", "Programa de variedade", "Programa infantil", 
+            "Minisserie", "Filme de romance", "Serie de suspense", "Programa de auditorio", "Programa de reformas", 
+            "Programa de talentos", "Filme de aventura", "Filme de fantasia", "Serie de misterio", 
+            "Programa de saude e bem-estar", "Telejornal", "Novela", "Programa de tecnologia", 
+            "Programa de natureza e vida selvagem", "Talk show", "Programa de moda e estilo", "Filme historico", 
+            "Serie policial", "Programa de quiz e jogos", "Serie documental", "Programa de debates", 
+            "Programa de espiritualidade/religiao", "Filme de animacao", "Serie antologica"
+        ])
         layout.addWidget(self.content_combo)
 
         self.collect_button = QPushButton('Iniciar Coleta', self)
@@ -137,15 +143,13 @@ class ColetaInicialWidget(QWidget):
         self.export_button.setEnabled(False)
         layout.addWidget(self.export_button)
 
-        self.progress_bar = QProgressBar(self)
-        layout.addWidget(self.progress_bar)
-
         self.output = QTextEdit(self)
-        self.output.setReadOnly(True)  # Torna o campo de log somente leitura
+        self.output.setReadOnly(True)
         layout.addWidget(self.output)
 
         self.setLayout(layout)
         self.setWindowTitle('Coleta Inicial')
+        self.show()
 
     def get_selected_port(self):
         return self.port_combo.currentText()
@@ -157,12 +161,11 @@ class ColetaInicialWidget(QWidget):
         port = self.get_selected_port()
         duration = self.get_selected_duration()
         self.output.append(f"Iniciando coleta de dados na porta {port} por {duration // 60} minutos...")
-        self.collect_button.setEnabled(False)  # Desabilita o botão após ser clicado
+        self.collect_button.setEnabled(False)
 
         self.data_collection_thread = DataCollectionThread(port, duration)
         self.data_collection_thread.log_signal.connect(self.log_output)
         self.data_collection_thread.data_signal.connect(self.store_data)
-        self.data_collection_thread.progress_signal.connect(self.update_progress)
         self.data_collection_thread.start()
 
     def log_output(self, message):
@@ -171,19 +174,15 @@ class ColetaInicialWidget(QWidget):
     def store_data(self, data):
         self.data = data
         self.export_button.setEnabled(True)
-        self.collect_button.setEnabled(True)  # Reabilita o botão após a coleta ser concluída
+        self.collect_button.setEnabled(True)
         self.output.append("Coleta de dados armazenada.")
-
-    def update_progress(self, value):
-        self.progress_bar.setValue(value)
 
     def export_csv(self):
         try:
-            df = pd.DataFrame(self.data, columns=['irValue', 'beatsPerMinute', 'beatAvg', 'GSR'])
+            df = pd.DataFrame(self.data, columns=['beatsPerMinute', 'beatAvg', 'GSR'])
             content_type = self.content_combo.currentText()
             df['Content'] = content_type
 
-            # Verificar se já existe um arquivo com o mesmo nome e ajustar o nome do arquivo se necessário
             base_filename = 'coleta_dados'
             extension = '.csv'
             filename = base_filename + extension
@@ -255,7 +254,7 @@ class PredictionResultDialog(QDialog):
         layout.addWidget(self.label)
         self.setLayout(layout)
 
-class MindTVApp(QWidget):
+class MindTVAppWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -297,6 +296,7 @@ class MindTVApp(QWidget):
 
         self.setLayout(layout)
         self.setWindowTitle('MindTV App')
+        self.show()
 
     def get_selected_port(self):
         return self.port_combo.currentText()
@@ -317,7 +317,7 @@ class MindTVApp(QWidget):
         self.data_collection_thread.start()
 
     def save_data(self, data):
-        df = pd.DataFrame(data, columns=['irValue', 'beatsPerMinute', 'beatAvg', 'GSR'])
+        df = pd.DataFrame(data, columns=['beatsPerMinute', 'beatAvg', 'GSR'])
         df.to_csv('collected_data.csv', index=False)
         self.output.append("Dados coletados e salvos em collected_data.csv")
         self.collect_button.setEnabled(True)
@@ -347,20 +347,22 @@ class MindTVApp(QWidget):
 class MainApp(QTabWidget):
     def __init__(self):
         super().__init__()
+        self.initUI()
 
-        self.coleta_inicial = ColetaInicialWidget()
-        self.treinamento_rede = TreinamentoRedeWidget()
-        self.mindtv_app = MindTVApp()
+    def initUI(self):
+        self.coleta_inicial_widget = ColetaInicialWidget()
+        self.treinamento_rede_widget = TreinamentoRedeWidget()
+        self.mindtv_app_widget = MindTVAppWidget()
 
-        self.addTab(self.coleta_inicial, "Coleta Inicial")
-        self.addTab(self.treinamento_rede, "Treinamento da Rede")
-        self.addTab(self.mindtv_app, "MindTV App")
+        self.addTab(self.coleta_inicial_widget, "Coleta Inicial")
+        self.addTab(self.treinamento_rede_widget, "Treinamento da Rede")
+        self.addTab(self.mindtv_app_widget, "MindTV App")
 
-        self.setWindowTitle('MindTV Main Application')
+        self.setWindowTitle('MindTV App')
         self.resize(800, 600)
+        self.show()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main_app = MainApp()
-    main_app.show()
     sys.exit(app.exec_())

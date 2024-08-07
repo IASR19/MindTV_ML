@@ -11,10 +11,9 @@ class DataCollectionThread(QThread):
     data_signal = pyqtSignal(list)
     progress_signal = pyqtSignal(int)
 
-    def __init__(self, port, duration, frequency):
+    def __init__(self, port, frequency):
         super().__init__()
         self.port = port
-        self.duration = duration
         self.frequency = frequency
         self.collecting = True
 
@@ -22,15 +21,13 @@ class DataCollectionThread(QThread):
         try:
             ser = serial.Serial(self.port, 115200)
             collected_data = []
-            start_time = pd.Timestamp.now()
-            while (pd.Timestamp.now() - start_time).seconds < self.duration:
+            for sample_num in range(self.frequency):
                 data = ser.readline().decode('utf-8').strip()
                 self.log_signal.emit(data)
                 data_split = data.split(',')
                 if len(data_split) == 4:
                     collected_data.append([float(data_split[0]), float(data_split[1]), float(data_split[2]), float(data_split[3])])
-                elapsed_time = (pd.Timestamp.now() - start_time).seconds
-                progress = int((elapsed_time / self.duration) * 100)
+                progress = int(((sample_num + 1) / self.frequency) * 100)
                 self.progress_signal.emit(progress)
             self.data_signal.emit(collected_data)
             ser.close()
@@ -129,12 +126,11 @@ class MainWindow(QWidget):
 
     def collect_data(self):
         port = self.get_selected_port()
-        duration = self.get_duration() * 60  # Convert to seconds
         frequency = self.get_frequency() * self.get_duration() # Obter a frequência de coleta em minutos
         self.output.append(f"Iniciando coleta de dados na porta {port} por {self.get_duration()} minutos...")
 
         self.collect_button.setEnabled(False)
-        self.data_collection_thread = DataCollectionThread(port, duration, frequency)
+        self.data_collection_thread = DataCollectionThread(port, frequency)
         self.data_collection_thread.log_signal.connect(self.log_output)
         self.data_collection_thread.data_signal.connect(self.save_data)
         self.data_collection_thread.progress_signal.connect(self.update_progress)

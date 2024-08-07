@@ -88,7 +88,7 @@ class MainWindow(QWidget):
         self.duration_spin.setRange(1, 5)
         layout.addWidget(self.duration_spin)
         
-        self.frequency_label = QLabel("Selecione a frequência de coleta por minutos:")
+        self.frequency_label = QLabel("Selecione a frequência de coleta por minuto:")
         layout.addWidget(self.frequency_label)
 
         self.frequency_combo = QComboBox(self)
@@ -140,7 +140,6 @@ class MainWindow(QWidget):
         df = pd.DataFrame(data, columns=['beatsPerMinute', 'beatAvg', 'GSR'])
         df.to_csv('collected_data.csv', index=False)
         self.output.append("Dados coletados e salvos em collected_data.csv")
-        self.collect_button.setEnabled(True)
         self.predict_button.setEnabled(True)
 
     def update_progress(self, value):
@@ -153,9 +152,13 @@ class MainWindow(QWidget):
             self.prediction_thread = PredictionThread(model, data)
             self.prediction_thread.log_signal.connect(self.log_output)
             self.prediction_thread.prediction_signal.connect(self.show_prediction_result)
+            self.predict_button.setEnabled(False)
+            self.collect_button.setEnabled(True)
             self.prediction_thread.start()
         except Exception as e:
             self.output.append(f"Erro ao carregar modelo ou dados: {str(e)}")
+            self.predict_button.setEnabled(False)
+            self.collect_button.setEnabled(True)
 
     def show_prediction_result(self, message):
         dialog = PredictionResultDialog(message)

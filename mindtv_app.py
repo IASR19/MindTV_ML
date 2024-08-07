@@ -11,10 +11,11 @@ class DataCollectionThread(QThread):
     data_signal = pyqtSignal(list)
     progress_signal = pyqtSignal(int)
 
-    def __init__(self, port, duration):
+    def __init__(self, port, duration, frequency):
         super().__init__()
         self.port = port
         self.duration = duration
+        self.frequency = frequency
         self.collecting = True
 
     def run(self):
@@ -47,11 +48,11 @@ class PredictionThread(QThread):
 
     def run(self):
         try:
-            df = pd.DataFrame(self.data, columns=['irValue', 'beatsPerMinute', 'beatAvg', 'GSR'])
+            df = pd.DataFrame(self.data, columns=['beatsPerMinute', 'beatAvg', 'GSR'])
             predictions = self.model.predict(df)
             prediction_counts = pd.Series(predictions).value_counts()
             most_common = prediction_counts.idxmax()
-            result_message = f"Tipo de conteúdo previsto: {most_common}"
+            result_message = f"Tipo de emoção sentida: {most_common}"
             self.prediction_signal.emit(result_message)
             self.log_signal.emit(result_message)
         except Exception as e:
@@ -89,12 +90,19 @@ class MainWindow(QWidget):
         self.duration_spin = QSpinBox(self)
         self.duration_spin.setRange(1, 5)
         layout.addWidget(self.duration_spin)
+        
+        self.frequency_label = QLabel("Selecione a frequência de coleta por minutos:")
+        layout.addWidget(self.frequency_label)
+
+        self.frequency_combo = QComboBox(self)
+        self.frequency_combo.addItems(["64", "128", "256"])
+        layout.addWidget(self.frequency_combo)
 
         self.collect_button = QPushButton('Iniciar Coleta', self)
         self.collect_button.clicked.connect(self.collect_data)
         layout.addWidget(self.collect_button)
 
-        self.predict_button = QPushButton('Previsão de Conteúdo', self)
+        self.predict_button = QPushButton('Previsão de Emoção', self)
         self.predict_button.clicked.connect(self.predict_content)
         self.predict_button.setEnabled(False)
         layout.addWidget(self.predict_button)
@@ -115,21 +123,25 @@ class MainWindow(QWidget):
 
     def get_duration(self):
         return self.duration_spin.value()
+    
+    def get_frequency(self):
+        return int(self.frequency_combo.currentText())
 
     def collect_data(self):
         port = self.get_selected_port()
         duration = self.get_duration() * 60  # Convert to seconds
+        frequency = self.get_frequency() * self.get_duration() # Obter a frequência de coleta em minutos
         self.output.append(f"Iniciando coleta de dados na porta {port} por {self.get_duration()} minutos...")
 
         self.collect_button.setEnabled(False)
-        self.data_collection_thread = DataCollectionThread(port, duration)
+        self.data_collection_thread = DataCollectionThread(port, duration, frequency)
         self.data_collection_thread.log_signal.connect(self.log_output)
         self.data_collection_thread.data_signal.connect(self.save_data)
         self.data_collection_thread.progress_signal.connect(self.update_progress)
         self.data_collection_thread.start()
 
     def save_data(self, data):
-        df = pd.DataFrame(data, columns=['irValue', 'beatsPerMinute', 'beatAvg', 'GSR'])
+        df = pd.DataFrame(data, columns=['beatsPerMinute', 'beatAvg', 'GSR'])
         df.to_csv('collected_data.csv', index=False)
         self.output.append("Dados coletados e salvos em collected_data.csv")
         self.collect_button.setEnabled(True)
